@@ -3,3 +3,9 @@
 
 # VS Code settings
 .vscode/
+
+# Data
+data/
+
+# Compilations
+__pycache__/
