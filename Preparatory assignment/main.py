@@ -38,7 +38,7 @@ if __name__ == "__main__":
         nn.CrossEntropyLoss,
         batch_size).to(device)
 
-    convergence_treshold = 0.000000000000001
+    convergence_treshold = 0.0001
     window_1_size = 6
     window_2_size = 3
     max_no_epochs = 70

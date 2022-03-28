@@ -166,7 +166,7 @@ class CNNMNIST(nn.Module):
         accchange = 1
         epoch = 1
 
-        while (accchange > convergence_treshold or accchange<0) and (
+        while (accchange > convergence_treshold) and (
             epoch <= max_no_epochs):
             self.train_one_epoch()
 
