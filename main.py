@@ -1,9 +1,11 @@
+import matplotlib
 from nn_design import CNNMNIST
-from dataloaders import get_MNIST_dataloaders
-from training_testing import train, test
 from torch import nn
 from torch.optim import SGD, Adam
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from help_functions import plot_results, find_errornous_predictions
 
 if __name__ == "__main__":
     # Hardware parameter
@@ -20,72 +22,57 @@ if __name__ == "__main__":
     
     fc_layers = [
         {
-            "out_features": 256
+            "out_features": 200
         }
     ]
 
-    # Finialize network construction
-    model = CNNMNIST(conv_layers, fc_layers).to(device)
-    loss_fn = nn.CrossEntropyLoss()
-
+    # TODO: try out a learning rate scheduler?
     learning_rate = 1e-3
-    optimizer = Adam(
-        params=model.parameters(), 
-        lr=learning_rate
-    )
-
     batch_size = 64
-    train_dl, test_dl = get_MNIST_dataloaders(batch_size)
 
-    max_no_epochs = 40
-    convergence_treshold = 0.0001
-    avgloss = []
-    totacc = []
+    model = CNNMNIST(
+        conv_layers, 
+        fc_layers, 
+        Adam, 
+        learning_rate, 
+        nn.CrossEntropyLoss,
+        batch_size).to(device)
 
+    convergence_treshold = 0.000000000000001
     window_1_size = 6
     window_2_size = 3
+    max_no_epochs = 70
     warmup_periods = 6
-    losschange = 1
-    accchange = 1
-    epoch = 1
 
-    # TODO: try out a learning rate scheduler?
+    model.fit(
+        convergence_treshold,
+        window_1_size,
+        window_2_size,
+        max_no_epochs,
+        warmup_periods    
+    )
 
-    while accchange > convergence_treshold and epoch <= max_no_epochs:
-        train(
-            train_dl,
-            model,
-            loss_fn,
-            optimizer
-        )
+    # Plot confusion matrix
+    #%matplotlib widget
+    #cm = model.confusion_matrix()
+    #ax = plt.axes()
+    #s = sns.heatmap(cm, annot=True, fmt=".0f")
+    #s.set_xlabel("Predicted")
+    #s.set_ylabel("Label")
+    #ax.set_title("Adam")
 
-        closs, caccuracy = test(
-            test_dl,
-            model,
-            loss_fn
-        )
-        print("Epoch", epoch)
-        print("Test accuracy:", caccuracy)
+    # Plot errornous predictions
+    #label = 7
+    #pred = 2
+    #err_preds = find_errornous_predictions(model, label, pred)
+    #%matplotlib widget
+    #ax = plt.axes()
+    #s = sns.heatmap(err_preds[0], cmap="magma")
+    #ax.set_title(str(label) + " predicted as " + str(pred))
 
-        avgloss.append(closs)
-        totacc.append(caccuracy)
+    
 
-        avglossr1 = np.mean(avgloss[-window_1_size:])
-        avglossr2 = np.mean(avgloss[-window_2_size:])
-        losschange = (avglossr1-avglossr2)/avglossr1
 
-        totaccr1 = np.mean(totacc[-window_1_size:])
-        totaccr2 = np.mean(totacc[-window_2_size:])
-        accchange = (totaccr2-totaccr1)/totaccr1
-
-        print("Change in loss function:", losschange)
-        print("Change in accuracy:", accchange)
-
-        if epoch <= max(1, warmup_periods):
-            losschange = 1
-            accchange = 1
-            
-        epoch += 1
 
 
 
