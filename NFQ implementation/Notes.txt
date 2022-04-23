@@ -1,0 +1,16 @@
+CartPole-v1
+-----------
+Version 0.1
+- The agent does not improve
+- Goes either left or right all the time
+- ANN configuration does not matter for convergence
+	- Have tried Rprop, Adam, SGD...
+	- ...ReLu, Sigmoid...
+	- ...2 hidden layers, 3 hidden layers...
+	- ...layer sizes of 5 neuron, 20 neurons
+- Using MSE as loss function
+- Don't use any batches in training (all samples in 1 bacth each epoch)
+	- Samuel Blad succeeded with a batch size of 1024. Mine does not improve at all even before I have reached that number of samples.
+- Have not adjusted the reward anything
+- Using one-hot encoding for the actions
+	- Input to ANN is then 6 features
