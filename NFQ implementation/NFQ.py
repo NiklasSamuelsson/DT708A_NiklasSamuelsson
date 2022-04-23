@@ -29,10 +29,12 @@ class NFQ:
             while not done:
                 # The number of steps to take before performing an update
                 for cstep in range(no_steps):
-                    #print("TRAIN")
                     a = self.get_action(s)
                     s_, r, done, _ = self.env.step(a)
+                    if done:
+                        r = 0
                     self.experience.append([s, a, r, s_])
+                    s = s_
 
                 x, y = self.create_training_data()
 
@@ -51,9 +53,11 @@ class NFQ:
                 a = self.get_greedy_action(s)
                 s_, r, done, _ = self.env.step(a)
                 self.env.render()
+                s = s_
 
     def get_action(self, s):
-        action_type = np.random.choice(a=["greedy", "random"], 
+        action_type = np.random.choice(
+            a=["greedy", "random"], 
             size=1, 
             p=[1-self.epsilon, self.epsilon])[0]
 
@@ -73,9 +77,13 @@ class NFQ:
             if v > max_action_v:
                 max_action = action
                 max_action_v = v
+            elif v == max_action_v:
+                rn_action = np.random.choice(a=[action, max_action], size=1)[0]
+                if rn_action != max_action:
+                    max_action = action
+                    max_action_v = v
                 
         a = max_action
-        #print(max_action_v)
 
         return a
 
@@ -93,6 +101,13 @@ class NFQ:
 
         return sample
 
+    def calculate_target(self, r, s_):
+        greedy_a = self.get_greedy_action(s_)
+        greedy_v = self.get_state_action_value(s_, greedy_a)
+        target = r + self.discount * greedy_v
+        
+        return target
+
     def create_training_data(self):
         # TODO: implement batch size
         self.batch_size = len(self.experience)
@@ -103,8 +118,7 @@ class NFQ:
         x = torch.as_tensor(x, dtype=torch.float)
 
         # Target: r + discount * max_a(Q(s', a))
-        #print("CREATE DATA")
-        y = [item[2] + self.discount * self.get_state_action_value(item[3], self.get_greedy_action(item[3])) for item in self.experience]
+        y = [self.calculate_target(item[2], item[3]) for item in self.experience]
         y = torch.as_tensor(y, dtype=torch.float)
 
         return x, y

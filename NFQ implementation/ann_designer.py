@@ -20,9 +20,9 @@ class ANN(nn.Module):
         self.seq.append(nn.Sigmoid())
 
         self.loss_fn = nn.MSELoss()
-        self.optimizer = Rprop(
+        self.optimizer = Adam(
             params=self.parameters(),
-            lr=0.1
+            lr=0.001
         )
 
     def forward(self, x):

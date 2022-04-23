@@ -1,7 +1,8 @@
 CartPole-v1
 -----------
 Version 0.1
-- The agent does not improve
+- Found one bug early (see image "Bug nr 1")
+- The agent still does not improve
 - Goes either left or right all the time
 - ANN configuration does not matter for convergence
 	- Have tried Rprop, Adam, SGD...
@@ -14,3 +15,27 @@ Version 0.1
 - Have not adjusted the reward anything
 - Using one-hot encoding for the actions
 	- Input to ANN is then 6 features
+- Output is one neuron containing the state-action value
+- Discount is 0.9
+	- 0.99 doesn't make a difference
+- Epsilon is 0.1
+	- Making it 100% greedy (epsilon=0) does not improve it
+- Number of epochs does not change anything
+	- Have tried 20, 25, 40 and 100
+
+
+Version 0.2
+- Found one completely game breaking bug (see image "Bug nr 2")!
+	- Did not resolve the issue...
+- Tried to change learning rate from 0.1 to 0.001: did not improve learning
+	- Same behavior of going in just on direction
+	- Also tried 0.01 but no improvements still
+- Tried with only 5 epochs and 500 epochs: no improvements
+- Currently using Sigmoid: impossible for the NN to reach the proper state-action values (see image "Tuning issue nr 1")
+	- Like Samuel Blad said!
+	- Changing to ReLu everywhere did not resolve it
+	- Neither did removing the last activation function (which was ReLu)
+- Tried to implement a uniform random choice as tie-breaker for equally greedy actions: no improvement
+- Tried normalizing input to ANN: no improvement
+
+
