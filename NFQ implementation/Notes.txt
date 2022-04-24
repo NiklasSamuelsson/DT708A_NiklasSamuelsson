@@ -39,3 +39,16 @@ Version 0.2
 - Tried normalizing input to ANN: no improvement
 
 
+Version 0.3
+- Tried chaning reward to 0 for all transitions except termination (1) and also set the greedy action to minimize instead: no improvement
+- Initialized the experiece buffer with uniform random action selection transition for 200 episodes: no improvement whatsoever
+- Only updated Q after each episode: no difference
+- Reduced ANN to only have 5 neurons per hidden layer without any improvement
+- Set the target equal to the r if next state is terminal (r==1), no improvement
+- Treid chaning dtype to float64 instead of torch32: no diff
+- Tried 1 epoch only, no improvement
+- Move the squeeze function in the ANN, no diff
+- Tried recalculating target after each epoch, no change
+- Tried normalizing input again, no diff
+- Tried setting target to 0 for all experiences except terminal ones for the first 100 eps, no diff
+	- Also tried a much bigger network with this to no avail.

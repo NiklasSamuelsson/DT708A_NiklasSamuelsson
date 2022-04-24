@@ -21,7 +21,7 @@ class NFQ:
 
     def train(self, no_episodes, no_epochs, no_steps=1):
         for ep in range(no_episodes):
-
+            self.ep = ep
             s = self.env.reset()
             done = False
 
@@ -31,16 +31,14 @@ class NFQ:
                 for cstep in range(no_steps):
                     a = self.get_action(s)
                     s_, r, done, _ = self.env.step(a)
-                    if done:
+                    if not done:
                         r = 0
                     self.experience.append([s, a, r, s_])
                     s = s_
 
-                x, y = self.create_training_data()
-
-                self.refit_Q(x, y, no_epochs)
-
                 ep_len += 1
+            
+            self.refit_Q(no_epochs)
             
             print("Episode", ep, "\tLen", ep_len)
 
@@ -70,11 +68,11 @@ class NFQ:
 
     def get_greedy_action(self, s):
         max_action = -99
-        max_action_v = -np.inf
+        max_action_v = np.inf
         for action in self.all_actions:
             v = self.get_state_action_value(s, action)
 
-            if v > max_action_v:
+            if v < max_action_v:
                 max_action = action
                 max_action_v = v
             elif v == max_action_v:
@@ -102,9 +100,14 @@ class NFQ:
         return sample
 
     def calculate_target(self, r, s_):
-        greedy_a = self.get_greedy_action(s_)
-        greedy_v = self.get_state_action_value(s_, greedy_a)
-        target = r + self.discount * greedy_v
+        if r == 1:
+            target = r
+        elif self.ep < 100:
+            target = 0
+        else:
+            greedy_a = self.get_greedy_action(s_)
+            greedy_v = self.get_state_action_value(s_, greedy_a)
+            target = r + self.discount * greedy_v
         
         return target
 
@@ -123,11 +126,12 @@ class NFQ:
 
         return x, y
 
-    def refit_Q(self, x, y, no_epochs):
+    def refit_Q(self, no_epochs):
 
         self.Q = ANN().to("cpu")
 
         for e in range(no_epochs):
+            x, y = self.create_training_data()
             self.Q.fit_one_epoch(x, y)
 
 

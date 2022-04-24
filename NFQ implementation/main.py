@@ -11,8 +11,8 @@ if __name__ == "__main__":
     )
 
     agent.train(
-        no_episodes=200,
-        no_epochs=20
+        no_episodes=500,
+        no_epochs=50
     )
 
     #agent.play_episodes(

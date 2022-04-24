@@ -1,5 +1,8 @@
 from torch import nn
+from torch import squeeze
 from torch.optim import SGD, Rprop, Adam
+
+
 class ANN(nn.Module):
 
     def __init__(self):
@@ -7,27 +10,32 @@ class ANN(nn.Module):
 
         self.seq = nn.Sequential()
 
-        self.seq.append(nn.Linear(in_features=6, out_features=20))
+        no_neurons = 50
+
+        self.seq.append(nn.Linear(in_features=6, out_features=no_neurons))
         self.seq.append(nn.Sigmoid())
 
-        self.seq.append(nn.Linear(in_features=20, out_features=20))
+        self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
         self.seq.append(nn.Sigmoid())
 
-        self.seq.append(nn.Linear(in_features=20, out_features=20))
+        self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
         self.seq.append(nn.Sigmoid())
 
-        self.seq.append(nn.Linear(in_features=20, out_features=1))
+        self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
+        self.seq.append(nn.Sigmoid())
+
+        self.seq.append(nn.Linear(in_features=no_neurons, out_features=1))
         self.seq.append(nn.Sigmoid())
 
         self.loss_fn = nn.MSELoss()
-        self.optimizer = Adam(
+        self.optimizer = Rprop(
             params=self.parameters(),
             lr=0.001
         )
 
     def forward(self, x):
 
-        output = self.seq(x)
+        output = squeeze(self.seq(x))
 
         return output
 
@@ -37,7 +45,7 @@ class ANN(nn.Module):
         #for x_, y_ in zip(x, y):
 
         pred = self(x)
-        loss = self.loss_fn(pred.squeeze(), y)
+        loss = self.loss_fn(pred, y)
 
         self.optimizer.zero_grad()
         loss.backward()
