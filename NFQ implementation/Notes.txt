@@ -52,3 +52,8 @@ Version 0.3
 - Tried normalizing input again, no diff
 - Tried setting target to 0 for all experiences except terminal ones for the first 100 eps, no diff
 	- Also tried a much bigger network with this to no avail.
+
+Version 0.4
+- Reverted everything back to the original enviroment (no adjustment to rewards)
+- Tried ReLU, Tanh and Sigmoid again to no avail.
+- Treid reducing the reward to 1/100, no diff
