@@ -1,10 +1,13 @@
 from torch import nn
 from torch import squeeze
 from torch.optim import SGD, Rprop, Adam
-import numpy as np
 
 
 class ANN(nn.Module):
+    """
+    An artificial neural network.
+    Implemented as a multi layer perceptron.
+    """
 
     def __init__(self):
         super().__init__()
@@ -14,30 +17,58 @@ class ANN(nn.Module):
         no_neurons = 20
 
         self.seq.append(nn.Linear(in_features=6, out_features=no_neurons))
-        self.seq.append(nn.Sigmoid())
+        self.seq.append(nn.Tanh())
 
         self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
-        self.seq.append(nn.Sigmoid())
+        self.seq.append(nn.Tanh())
 
         self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
-        self.seq.append(nn.Sigmoid())
+        self.seq.append(nn.Tanh())
+
+        self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
+        self.seq.append(nn.Tanh())
 
         self.seq.append(nn.Linear(in_features=no_neurons, out_features=1))
-        self.seq.append(nn.Sigmoid())
+        self.seq.append(nn.Tanh())
 
         self.loss_fn = nn.MSELoss()
         self.optimizer = Adam(
             params=self.parameters(),
-            lr=0.00001
+            lr=0.01
         )
 
     def forward(self, x):
+        """
+        Performs a forward pass through the network with the provided data.
 
+        Parameters
+        ----------
+        x : pytorch tensor
+            The input data to predcit upon.
+
+        Returns
+        -------
+        pytorch tensor
+            The output from the model.
+        """
         output = squeeze(self.seq(x))
 
         return output
 
     def fit_one_epoch(self, x, y, batch_size=None):
+        """
+        Fits the neural network for one epoch.
+
+        Parameters
+        ----------
+        x : pytorch tensor
+            The input data to the neural network.
+        y : pytorch tensor
+            The target data.
+        batch_size : int, optional
+            The batch size to use in training. If set to None, then all
+            training data will be used as one batch, by default None
+        """
         stop = x.shape[0]
         if batch_size is None:
             batch_size = stop

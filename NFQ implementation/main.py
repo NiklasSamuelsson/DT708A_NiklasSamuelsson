@@ -10,16 +10,16 @@ if __name__ == "__main__":
         epsilon=0.1
     )
 
-    # Generate randomly controlled experience
+    # Unfortunately, the agent is not learning anything
     agent.train(
-        no_episodes=1000,
-        no_epochs=20
+        no_episodes=100,
+        no_epochs=15,
+        batch_size=1000,
+        no_steps=1000,
+        random_action=False
     )
 
-    agent.refit_Q(no_epochs=10, batch_size=100)
+    #agent.refit_Q(no_epochs=10, batch_size=100)
 
-    agent.play_episodes(no_episodes=20)
+    #agent.play_episodes(no_episodes=20)
 
-    #agent.play_episodes(
-    #    no_episodes=30
-    #)
