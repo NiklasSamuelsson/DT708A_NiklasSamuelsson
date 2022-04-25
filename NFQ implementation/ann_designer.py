@@ -1,6 +1,7 @@
 from torch import nn
 from torch import squeeze
 from torch.optim import SGD, Rprop, Adam
+import numpy as np
 
 
 class ANN(nn.Module):
@@ -10,12 +11,9 @@ class ANN(nn.Module):
 
         self.seq = nn.Sequential()
 
-        no_neurons = 50
+        no_neurons = 20
 
         self.seq.append(nn.Linear(in_features=6, out_features=no_neurons))
-        self.seq.append(nn.Sigmoid())
-
-        self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
         self.seq.append(nn.Sigmoid())
 
         self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
@@ -28,9 +26,9 @@ class ANN(nn.Module):
         self.seq.append(nn.Sigmoid())
 
         self.loss_fn = nn.MSELoss()
-        self.optimizer = Rprop(
+        self.optimizer = Adam(
             params=self.parameters(),
-            lr=0.001
+            lr=0.00001
         )
 
     def forward(self, x):
@@ -39,14 +37,18 @@ class ANN(nn.Module):
 
         return output
 
-    def fit_one_epoch(self, x, y):
-        # Iterate over batches
-        # TODO: implement batch size
-        #for x_, y_ in zip(x, y):
+    def fit_one_epoch(self, x, y, batch_size=None):
+        stop = x.shape[0]
+        if batch_size is None:
+            batch_size = stop
+            
+        for b in range(0, stop, batch_size):
+            x_ = x[b:b+batch_size]
+            y_ = y[b:b+batch_size]
 
-        pred = self(x)
-        loss = self.loss_fn(pred, y)
+            pred = self(x_)
+            loss = self.loss_fn(pred, y_)
 
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()

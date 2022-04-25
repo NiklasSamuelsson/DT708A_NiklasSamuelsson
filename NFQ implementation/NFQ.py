@@ -21,7 +21,7 @@ class NFQ:
 
     def train(self, no_episodes, no_epochs, no_steps=1):
         for ep in range(no_episodes):
-            self.ep = ep
+            
             s = self.env.reset()
             done = False
 
@@ -29,16 +29,17 @@ class NFQ:
             while not done:
                 # The number of steps to take before performing an update
                 for cstep in range(no_steps):
-                    a = self.get_action(s)
+                    #a = self.get_action(s)
+                    a = np.random.choice(self.all_actions, size=1)[0]
                     s_, r, done, _ = self.env.step(a)
                     if not done:
                         r = 0
                     self.experience.append([s, a, r, s_])
                     s = s_
 
+                    #self.refit_Q(no_epochs)
+
                 ep_len += 1
-            
-            self.refit_Q(no_epochs)
             
             print("Episode", ep, "\tLen", ep_len)
 
@@ -46,12 +47,15 @@ class NFQ:
         for ep in range(no_episodes):
             s = self.env.reset()
             done = False
-            self.env.render()
+            #self.env.render()
+            ep_len = 0
             while not done:
                 a = self.get_greedy_action(s)
                 s_, r, done, _ = self.env.step(a)
-                self.env.render()
+                #self.env.render()
                 s = s_
+                ep_len +=1
+            print("Episode", ep, "\tLen", ep_len)
 
     def get_action(self, s):
         action_type = np.random.choice(
@@ -102,8 +106,6 @@ class NFQ:
     def calculate_target(self, r, s_):
         if r == 1:
             target = r
-        elif self.ep < 100:
-            target = 0
         else:
             greedy_a = self.get_greedy_action(s_)
             greedy_v = self.get_state_action_value(s_, greedy_a)
@@ -112,9 +114,6 @@ class NFQ:
         return target
 
     def create_training_data(self):
-        # TODO: implement batch size
-        self.batch_size = len(self.experience)
-
         # Input: (s, a)
         x = [self.create_one_prediction_sample(item[0], item[1]) for item in self.experience]
         x = np.stack(x)
@@ -126,13 +125,15 @@ class NFQ:
 
         return x, y
 
-    def refit_Q(self, no_epochs):
+    def refit_Q(self, no_epochs, batch_size=None):
 
         self.Q = ANN().to("cpu")
 
         for e in range(no_epochs):
+            print("Epoch", e)
             x, y = self.create_training_data()
-            self.Q.fit_one_epoch(x, y)
+            self.Q = ANN().to("cpu")
+            self.Q.fit_one_epoch(x, y, batch_size)
 
 
 
