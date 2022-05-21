@@ -1,18 +1,33 @@
 import random
 import numpy as np
+import copy
 
 class DQN:
 
-    def __init__(self, env, epsilon, discount, replay_memory_size, batch_size, loss_threshold):
+    def __init__(
+        self, 
+        env, 
+        epsilon, 
+        discount, 
+        replay_memory_size, 
+        batch_size, 
+        loss_threshold, 
+        reset_target_ANN_updates,
+        ANN
+    ):
 
         self.env = env
         self.epsilon = epsilon
         self.discount = discount
         self.replay_memory_size = replay_memory_size
-        self.batch_size = self.batch_size
+        self.batch_size = batch_size
         self.loss_threshold = loss_threshold
+        self.reset_target_ANN_updates = reset_target_ANN_updates
+        self.Q = ANN
         
         self.replay_memory = [[], [], [], [], []]
+        self.total_updates = 0
+        self.Q_hat = copy.deepcopy(self.Q)
 
     def train(self, no_episodes):
         episode = 0
@@ -39,45 +54,57 @@ class DQN:
                     self.replay_memory[i].pop(0)
 
             self.fit_ANN()
-            # Reset Q_hat to Q every C steps
+            self.total_updates += 1
+            if self.total_updates%self.reset_target_ANN_updates == 0:
+                # TODO: make sure this creates a copy and not a reference
+                self.Q_hat = copy.deepcopy(self.Q)
 
             s = s_
             ep_len += 1
         
         return ep_len
 
-    def get_action(self):
-        pass
+    def get_action(self, s):
+
+        if random.uniform(0, 1) <= self.epsilon:
+            # Select random action
+            a = 0
+        else:
+            a = self.get_greedy_action(s)
+        
+        return a
+
+    def get_greedy_action(self, s):
+        return self.Q(s)
 
     def fit_ANN(self):
-        state, action, reward, state_, done = self.sample_random_batch()
+        s, a, r, s_, done = self.sample_random_batch()
         target = self.calculate_target(
-            action=action,
-            reward=reward,
-            state_=state_,
+            a=a,
+            r=r,
+            s_=s_,
             done=done
         )
         loss = 99
         n_epochs = 0
         while loss > self.loss_threshold:
         # Loop epochs until convergence
-            loss = self.Q.fit(state, action, target)
+            loss = self.Q.train_one_epoch(s, target)
             n_epochs += 1
 
     def sample_random_batch(self):
         idx = random.sample(range(len(self.replay_memory)), self.batch_size)
-        state = [self.replay_memory[0][i] for i in idx]
-        action = [self.replay_memory[1][i] for i in idx]
-        reward = [self.replay_memory[2][i] for i in idx]
-        state_ = [self.replay_memory[3][i] for i in idx]
+        s = [self.replay_memory[0][i] for i in idx]
+        a = [self.replay_memory[1][i] for i in idx]
+        r = [self.replay_memory[2][i] for i in idx]
+        s_ = [self.replay_memory[3][i] for i in idx]
         done = [self.replay_memory[4][i] for i in idx]
 
-        return state, action, reward, state_, done
+        return s, a, r, s_, done
         
-    def calculate_target(self, action, reward, state_, done):
-        # TODO: fix input to ANN
-        pred = self.Q_hat(state_, action)
-        target = np.add(reward, pred)
-        target = np.where(done, reward, target)
+    def calculate_target(self, a, r, s_, done):
+        pred = self.Q_hat(s_)
+        target = np.add(r, np.multiply(self.discount, pred))
+        target = np.where(done, r, target)
         
         return target
