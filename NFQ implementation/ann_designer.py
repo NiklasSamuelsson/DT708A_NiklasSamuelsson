@@ -17,24 +17,24 @@ class ANN(nn.Module):
         no_neurons = 20
 
         self.seq.append(nn.Linear(in_features=6, out_features=no_neurons))
-        self.seq.append(nn.Tanh())
+        self.seq.append(nn.Sigmoid())
 
         self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
-        self.seq.append(nn.Tanh())
+        self.seq.append(nn.Sigmoid())
 
         self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
-        self.seq.append(nn.Tanh())
+        self.seq.append(nn.Sigmoid())
 
         self.seq.append(nn.Linear(in_features=no_neurons, out_features=no_neurons))
-        self.seq.append(nn.Tanh())
+        self.seq.append(nn.Sigmoid())
 
         self.seq.append(nn.Linear(in_features=no_neurons, out_features=1))
-        self.seq.append(nn.Tanh())
+        #self.seq.append(nn.Sigmoid())
 
         self.loss_fn = nn.MSELoss()
-        self.optimizer = Adam(
+        self.optimizer = Rprop(
             params=self.parameters(),
-            lr=0.01
+            lr=0.001
         )
 
     def forward(self, x):

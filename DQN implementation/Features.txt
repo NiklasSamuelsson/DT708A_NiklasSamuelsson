@@ -1,0 +1,5 @@
+1. Train on low-dimensional input
+2. Train on high-dimensional input
+3. Might want to adapt the reward function
+4. Different NN configurations
+5. Different learning parameters
