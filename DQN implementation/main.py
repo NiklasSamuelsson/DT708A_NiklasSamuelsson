@@ -8,22 +8,25 @@ if __name__ == "__main__":
     in_features = env.reset().shape[0]
     out_features = env.action_space.n
 
+    # TODO: try clipping loss function
     network = ANN(
         in_features=in_features,
         out_features=out_features,
-        lr=0.0001
+        lr=0.001
     )
 
+    # TODO: try CER (https://arxiv.org/pdf/1712.01275.pdf)
+    # TODO: try double Q-learning
     agent = DQN(
         env=env,
         epsilon=1,
         epsilon_min=0.1,
         epsilon_decay=0.9999,
         discount=0.99,
-        replay_memory_size=20000,
-        batch_size=50,
-        loss_threshold=0.5,
-        reset_target_ANN_updates=2000,
+        replay_memory_size=100000,
+        batch_size=64,
+        loss_threshold=0.1,
+        reset_target_ANN_updates=1000,
         ANN=network
     )
 
@@ -32,13 +35,13 @@ if __name__ == "__main__":
         init_replay_memory=True
     )
 
-    #for i in range(10):
-    #    agent.play_one_episode(render=True)
-
     agent.train(
-        no_episodes=10000,
+        no_episodes=800,
         init_replay_memory=False
     )
 
     for i in range(20):
-        agent.play_one_episode(render=True)
+        agent.play_one_episode(
+            render=True,
+            verbose=True
+        )

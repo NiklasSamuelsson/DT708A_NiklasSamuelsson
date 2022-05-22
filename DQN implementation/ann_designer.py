@@ -12,7 +12,7 @@ class ANN(torch.nn.Module):
 
         self.seq = torch.nn.Sequential()
 
-        no_neurons = 64
+        no_neurons = 32
 
         self.seq.append(torch.nn.Linear(in_features=in_features, out_features=no_neurons))
         self.seq.append(torch.nn.ReLU())

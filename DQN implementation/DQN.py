@@ -37,13 +37,25 @@ class DQN:
         self.all_actions = [a for a in range(self.env.action_space.start, self.env.action_space.n)]
 
     def train(self, no_episodes, init_replay_memory=False):
-        sum_ep_len = 0
+        sum_train_ep_len = 0
+        sum_test_ep_len = 0
         for episode in range(no_episodes):
-            ep_len = self.train_one_episode(init_replay_memory)
-            sum_ep_len += ep_len
-            avg_ep_len = sum_ep_len/(episode+1)
+            train_ep_len = self.train_one_episode(init_replay_memory)
+            sum_train_ep_len += train_ep_len
+            avg_train_ep_len = sum_train_ep_len/(episode+1)
+
+            test_ep_len = self.play_one_episode()
+            sum_test_ep_len += test_ep_len
+            avg_test_ep_len = sum_test_ep_len/(episode+1)
             if not init_replay_memory:
-                print("Episode:", episode, "\tLength:", ep_len, "\tAvg length:", avg_ep_len, "\tEpsilon:", self.epsilon, "\tExp buffer size:", len(self.replay_memory[0]))
+                print(
+                    "Episode:", episode, 
+                    "\tTraining length:", train_ep_len, 
+                    "\tAvg train length:", avg_train_ep_len, 
+                    "\tTest length:", test_ep_len,
+                    "\tAvg test length:", avg_test_ep_len,
+                    "\tEpsilon:", self.epsilon, 
+                    "\tExp buffer size:", len(self.replay_memory[0]))
 
     def train_one_episode(self, init_replay_memory):
         ep_len = 0
@@ -80,7 +92,7 @@ class DQN:
         
         return ep_len
 
-    def play_one_episode(self, render=False):
+    def play_one_episode(self, render=False, verbose=False):
         ep_len = 0
         s = self.env.reset()
         done = False
@@ -92,7 +104,10 @@ class DQN:
             s = s_
             ep_len += 1
         
-        print("Episode length:", ep_len)
+        if verbose:
+            print("Episode length:", ep_len)
+
+        return ep_len
 
     def get_action(self, s):
         self.epsilon *= self.epsilon_decay
@@ -126,9 +141,10 @@ class DQN:
         # TODO: make sure so that a's actions is reindexed to start at zero (in case env don't start at 0)
         loss = 99
         n_epochs = 0
-        while loss > self.loss_threshold:
-            loss = self.Q.train_one_epoch(s, a, target)
-            n_epochs += 1
+        #while loss > self.loss_threshold:
+        #    loss = self.Q.train_one_epoch(s, a, target)
+        #    n_epochs += 1
+        loss = self.Q.train_one_epoch(s, a, target)
         #print("Epochs:", n_epochs)
 
     def sample_random_batch(self):

@@ -1,0 +1,8 @@
+CartPole-v1
+-----------
+Low-dimensional state space:
+- Very unstable
+- Spend a LOT of time tuning parameters...
+- ...to no avail since everytime I fitted Q_hat I fited it until the loss was low enough instead of just taking one gradient step
+	- Should have understood this since the performance seemed better with a high loss_threshold parameter rather than a low
+- 
