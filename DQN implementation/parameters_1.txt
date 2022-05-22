@@ -1,0 +1,33 @@
+{
+	network_params: {
+		lr: 0.001
+	}
+	agent_params: {
+		epsilon: 1,
+		epsilon_min: 0.1,
+		epsilon_decay: 0.9999,
+		discount: 0.99,
+		replay_memory_size: 100000,
+		batch_size: 64,
+		loss_threshold: 0.1,
+		reset_target_ANN_updates: 1000
+	}
+	memory_init_params: {
+		no_episodes: 500
+	}
+}
+
+REWARD: 1 on each step. 0 on termination before step 500.
+
+ANN(
+  (seq): Sequential(
+    (0): Linear(in_features=4, out_features=32, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=32, out_features=32, bias=True)
+    (3): ReLU()
+    (4): Linear(in_features=32, out_features=32, bias=True)
+    (5): ReLU()
+    (6): Linear(in_features=32, out_features=2, bias=True)
+  )
+  (loss_fn): MSELoss()
+)

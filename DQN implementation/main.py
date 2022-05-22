@@ -8,7 +8,6 @@ if __name__ == "__main__":
     in_features = env.reset().shape[0]
     out_features = env.action_space.n
 
-    # TODO: try clipping loss function
     network = ANN(
         in_features=in_features,
         out_features=out_features,
@@ -25,7 +24,6 @@ if __name__ == "__main__":
         discount=0.99,
         replay_memory_size=100000,
         batch_size=64,
-        loss_threshold=0.1,
         reset_target_ANN_updates=1000,
         ANN=network
     )
@@ -36,11 +34,11 @@ if __name__ == "__main__":
     )
 
     agent.train(
-        no_episodes=800,
+        no_episodes=1200,
         init_replay_memory=False
     )
 
-    for i in range(20):
+    for i in range(10):
         agent.play_one_episode(
             render=True,
             verbose=True
