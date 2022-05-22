@@ -5,8 +5,8 @@ from ann_designer import ANN
 if __name__ == "__main__":
     env = gym.make("CartPole-v1")
 
-    in_features = env.reset().shape[0]
-    out_features = env.action_space.n
+    in_features = env.reset().shape[0] + env.action_space.n
+    out_features = 1
 
     network = ANN(
         in_features=in_features,
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         epsilon_decay=0.9999,
         discount=0.99,
         replay_memory_size=20000,
-        batch_size=50,
+        batch_size=32,
         loss_threshold=0.5,
         reset_target_ANN_updates=2000,
         ANN=network
@@ -36,9 +36,9 @@ if __name__ == "__main__":
     #    agent.play_one_episode(render=True)
 
     agent.train(
-        no_episodes=10000,
+        no_episodes=5000,
         init_replay_memory=False
     )
 
-    for i in range(20):
-        agent.play_one_episode(render=True)
+    #for i in range(20):
+    #    agent.play_one_episode(render=True)

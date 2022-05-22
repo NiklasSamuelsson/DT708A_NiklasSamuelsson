@@ -35,6 +35,10 @@ class DQN:
         self.total_updates = 0
         self.Q_hat = copy.deepcopy(self.Q)
         self.all_actions = [a for a in range(self.env.action_space.start, self.env.action_space.n)]
+        self.one_hot = []
+        for a in range(env.action_space.n):
+            self.one_hot.append([0 for i in range(env.action_space.n)])
+            self.one_hot[a][a] = 1
 
     def train(self, no_episodes, init_replay_memory=False):
         sum_ep_len = 0
@@ -59,7 +63,7 @@ class DQN:
             self.replay_memory[1].append(a)
             self.replay_memory[2].append(r)
             self.replay_memory[3].append(s_)
-            # Hack to set the right reward later
+            # Hack to set the right reward later for CartPole-v1
             if ep_len >= 500:
                 self.replay_memory[4].append(False)
             else:
@@ -105,29 +109,49 @@ class DQN:
         return a
 
     def get_greedy_action(self, s):
-        s = torch.tensor(s).reshape((1, s.shape[0]))
-        _, a = self.Q.predict_max(s)
+        best_av = 0
+        best_a = 0
+        for a, oh in enumerate(self.one_hot):
+            s_mod = np.append(s, oh)
+            s_mod = torch.tensor(s_mod, dtype=torch.float).reshape((1, s_mod.shape[0]))
+            v = self.Q(s_mod).item()
 
-        return a.item()
+            if v > best_av:
+                best_av = v
+                best_a = a
+
+        return best_a
 
     def fit_ANN(self):
         s, a, r, s_, done = self.sample_random_batch()
-        s_ = torch.tensor(np.array(s_))
+        state_actions = []
+        values = []
+        # Predict all state-action values for selected states to select the maximizing action
+        for oh in self.one_hot:
+            s_mod = np.append(np.array(s_), [oh for i in range(np.array(s_).shape[0])], axis=1)
+            state_actions.append(s_mod)
+            s_mod_t = torch.tensor(s_mod, dtype=torch.float)
+            v = self.Q_hat(s_mod_t)
+            values.append(v.detach().numpy())
+
+        # Create target data
+        max_av = np.max(values, axis=0).reshape(len(values[0]))
         target = self.calculate_target(
+            max_av=max_av,
             r=r,
-            s_=s_,
             done=done
         )
-
-        s = torch.tensor(np.array(s))
-        a = torch.tensor(np.array(a))
         target = torch.tensor(target, dtype=torch.float)
 
-        # TODO: make sure so that a's actions is reindexed to start at zero (in case env don't start at 0)
-        loss = 99
+        # Create input data
+        oh_a = np.array([self.one_hot[i] for i in a])
+        x = np.hstack((np.array(s), oh_a))
+        x = torch.tensor(x, dtype=torch.float)
+
+        loss = self.loss_threshold + 1
         n_epochs = 0
-        while loss > self.loss_threshold:
-            loss = self.Q.train_one_epoch(s, a, target)
+        while loss > self.loss_threshold and n_epochs < 200:
+            loss = self.Q.train_one_epoch(x, target)
             n_epochs += 1
         #print("Epochs:", n_epochs)
 
@@ -141,9 +165,8 @@ class DQN:
 
         return s, a, r, s_, done
         
-    def calculate_target(self, r, s_, done):
-        v, _ = self.Q_hat.predict_max(s_)
-        target = np.add(r, np.multiply(self.discount, v.detach().numpy()))
+    def calculate_target(self, max_av, r, done):
+        target = np.add(r, np.multiply(self.discount, max_av))
         # Don't reward agent when ending episode
         target = np.where(done, 0, target)
         

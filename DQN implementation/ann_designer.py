@@ -12,7 +12,7 @@ class ANN(torch.nn.Module):
 
         self.seq = torch.nn.Sequential()
 
-        no_neurons = 64
+        no_neurons = 32
 
         self.seq.append(torch.nn.Linear(in_features=in_features, out_features=no_neurons))
         self.seq.append(torch.nn.ReLU())
@@ -36,42 +36,16 @@ class ANN(torch.nn.Module):
 
         return pred
 
-    def predict_max(self, x):
+    def train_one_epoch(self, x, y):
         pred = self(x)
-        v, a = torch.max(pred, dim=1)
-
-        return v, a
-
-    def predict_given_actions(self, x, a):
-        pred = self(x)
-
-        a = torch.tensor(a)
-        aux = torch.ones(len(a), dtype=torch.int).cumsum(0)
-        a += aux * self.out_features - self.out_features
-        pred = pred.flatten()
-        pred = torch.index_select(pred, 0, a)
-
-        return pred
-
-    def train_one_epoch(self, x, a, y):
-        pred = self.predict_given_actions(x, a)
 
         loss = self.loss_fn(pred, y)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        pred = self.predict_given_actions(x, a)
+        pred = self(x)
         loss = self.loss_fn(pred, y)
 
         return loss
 
-
-if __name__ == "__main__":
-    x = torch.randn(5, 4)
-    y = torch.randn(5)
-
-    a = [0, 1, 1, 0, 1]
-    b = [1, 0, 0, 1, 1]
-
-    model = ANN(4, 2)
