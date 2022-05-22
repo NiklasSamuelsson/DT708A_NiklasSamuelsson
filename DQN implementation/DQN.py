@@ -9,7 +9,9 @@ class DQN:
     def __init__(
         self, 
         env, 
-        epsilon, 
+        epsilon,
+        epsilon_min,
+        epsilon_decay,
         discount, 
         replay_memory_size, 
         batch_size, 
@@ -20,6 +22,8 @@ class DQN:
 
         self.env = env
         self.epsilon = epsilon
+        self.epsilon_min = epsilon_min
+        self.epsilon_decay = epsilon_decay
         self.discount = discount
         self.replay_memory_size = replay_memory_size
         self.batch_size = batch_size
@@ -33,13 +37,15 @@ class DQN:
         self.all_actions = [a for a in range(self.env.action_space.start, self.env.action_space.n)]
 
     def train(self, no_episodes, init_replay_memory=False):
-        episode = 0
+        sum_ep_len = 0
         for episode in range(no_episodes):
             ep_len = self.train_one_episode(init_replay_memory)
-            print("Episode:", episode, "\tLength:", ep_len)
-            episode += 1
+            sum_ep_len += ep_len
+            avg_ep_len = sum_ep_len/(episode+1)
+            if not init_replay_memory:
+                print("Episode:", episode, "\tLength:", ep_len, "\tAvg length:", avg_ep_len, "\tEpsilon:", self.epsilon, "\tExp buffer size:", len(self.replay_memory[0]))
 
-    def train_one_episode(self, init_replay_memory=False):
+    def train_one_episode(self, init_replay_memory):
         ep_len = 0
         s = self.env.reset()
         done = False
@@ -74,7 +80,23 @@ class DQN:
         
         return ep_len
 
+    def play_one_episode(self, render=False):
+        ep_len = 0
+        s = self.env.reset()
+        done = False
+        while not done:
+            if render:
+                self.env.render()
+            a = self.get_greedy_action(s)
+            s_, r, done, _ = self.env.step(a)
+            s = s_
+            ep_len += 1
+        
+        print("Episode length:", ep_len)
+
     def get_action(self, s):
+        self.epsilon *= self.epsilon_decay
+        self.epsilon = max(self.epsilon, self.epsilon_min)
         if random.uniform(0, 1) <= self.epsilon:
             a = random.choice(self.all_actions)
         else:

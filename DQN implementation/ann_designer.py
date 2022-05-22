@@ -12,16 +12,16 @@ class ANN(torch.nn.Module):
 
         self.seq = torch.nn.Sequential()
 
-        no_neurons = 20
+        no_neurons = 64
 
         self.seq.append(torch.nn.Linear(in_features=in_features, out_features=no_neurons))
-        self.seq.append(torch.nn.Sigmoid())
+        self.seq.append(torch.nn.ReLU())
 
         self.seq.append(torch.nn.Linear(in_features=no_neurons, out_features=no_neurons))
-        self.seq.append(torch.nn.Sigmoid())
+        self.seq.append(torch.nn.ReLU())
 
         self.seq.append(torch.nn.Linear(in_features=no_neurons, out_features=no_neurons))
-        self.seq.append(torch.nn.Sigmoid())
+        self.seq.append(torch.nn.ReLU())
 
         self.seq.append(torch.nn.Linear(in_features=no_neurons, out_features=out_features))
 
