@@ -127,7 +127,10 @@ class DQN:
         ep_len = 0
         s = self.env.reset()
         if self.high_dim_input:
-            s = self.format_state(self.env.render(mode="rgb_array"))
+            s = np.zeros((4, 160, 240))
+            img = self.format_state(self.env.render(mode="rgb_array"))
+            for i in range(4):
+                s[i] = img
         done = False
         while not done:
             if init_replay_memory:
@@ -140,7 +143,9 @@ class DQN:
             self.replay_memory[2].append(r)
 
             if self.high_dim_input:
-                s_ = self.format_state(self.env.render(mode="rgb_array"))
+                next_img = self.format_state(self.env.render(mode="rgb_array"))
+                s_ = np.roll(s, 1, axis=0)
+                s_[0] = next_img
 
             self.replay_memory[3].append(s_)
             # Hack to set the right reward later
@@ -183,7 +188,10 @@ class DQN:
         ep_len = 0
         s = self.env.reset()
         if self.high_dim_input:
-            s = self.format_state(self.env.render(mode="rgb_array"))
+            s = np.zeros((4, 160, 240))
+            img = self.format_state(self.env.render(mode="rgb_array"))
+            for i in range(4):
+                s[i] = img
         done = False
         while not done:
             if render:
@@ -191,7 +199,9 @@ class DQN:
             a = self.get_greedy_action(s)
             s_, r, done, _ = self.env.step(a)
             if self.high_dim_input:
-                s_ = self.format_state(self.env.render(mode="rgb_array"))
+                next_img = self.format_state(self.env.render(mode="rgb_array"))
+                s_ = np.roll(s, 1, axis=0)
+                s_[0] = next_img
             s = s_
             ep_len += 1
         
@@ -239,8 +249,8 @@ class DQN:
         """
         if self.high_dim_input:
             s = torch.tensor(s, dtype=torch.float)
-            s = torch.moveaxis(s, 2, 0)
-            s = torch.tensor(s, dtype=torch.float).reshape((1, s.shape[0], s.shape[1], s.shape[2]))
+            #s = torch.moveaxis(s, 2, 0)
+            s = s.reshape(1, *s.shape)
         else:
             s = torch.tensor(s).reshape((1, s.shape[0]))
 
@@ -318,7 +328,7 @@ class DQN:
 
     def format_high_dim_tensor(self, tensor):
         tensor = tensor.to(torch.float)
-        tensor = torch.moveaxis(tensor, 3, 1)
+        #tensor = torch.moveaxis(tensor, 3, 1)
 
         return tensor
 
@@ -334,7 +344,7 @@ class DQN:
         transform = torchvision.transforms.Resize(160)
         s = transform(s)
         # FIXME: waste to cast it back to np just to align with rest of code
-        s = torch.moveaxis(s, 0, 2).numpy()
+        s = s.squeeze().numpy()
 
         return s
 

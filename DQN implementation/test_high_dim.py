@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     _ = env.reset()
     in_channels = env.render(mode="rgb_array").shape[2]
-    in_channels = 1
+    in_channels = 4
     out_features = env.action_space.n
 
     # TODO: automate testing
