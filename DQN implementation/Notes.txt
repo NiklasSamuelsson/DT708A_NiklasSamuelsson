@@ -2,7 +2,7 @@ CartPole-v1
 -----------
 Low-dimensional state space:
 - Very unstable
-- Spend a LOT of time tuning parameters...
+- Spent a LOT of time tuning parameters...
 - ...to no avail since everytime I fitted Q_hat I fited it until the loss was low enough instead of just taking one gradient step
 	- Should have understood this since the performance seemed better with a high loss_threshold parameter rather than a low
 - It did converge a couple of time with this errornous implementation though
@@ -15,9 +15,9 @@ Open questions
 --------------
 - What is our goal?
 	- Suggestion: finding a policy that solves the task with as few episodes as possible
-	- Suggestion: finding a policy that solves the task with as reliable as possible
+	- Suggestion: finding a policy that solves the task as reliably as possible
 - When do we consider CartPole-v1 solved?
 	- Suggestion: lasting an average of 495 timesteps or more for 100 consecutive episodes. Evaluated every 100 epsiodes
 - What is reliability?
-	- Suggestion: the variation (variance/standard deviation/quantiles) of number of episodes until solved over 50 trials
+	- Suggestion: the variation (variance/standard deviation/quantiles) of number of episodes until solved over 5 trials
 - MOTIVATION: 495 corresponds to failing 1 episode completely. 99/100 seems good (in the end, it's arbitrarily choosen).

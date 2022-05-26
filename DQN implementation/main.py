@@ -8,6 +8,8 @@ if __name__ == "__main__":
     in_features = env.reset().shape[0]
     out_features = env.action_space.n
 
+    # TODO: automate testing
+
     network = ANN(
         in_features=in_features,
         out_features=out_features,
