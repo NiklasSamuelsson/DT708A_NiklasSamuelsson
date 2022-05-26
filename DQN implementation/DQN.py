@@ -2,6 +2,7 @@ import random
 import numpy as np
 import copy
 import torch
+import torchvision
 
 
 class DQN:
@@ -13,6 +14,8 @@ class DQN:
     ----------
     env : Gym environement
         OpenAI gym style environment.
+    high_dim_input : bool
+        Whether to get high or low dimensional input from the environment.
     epsilon : float
         The starting probability of taking a random action.
     epsilon_min : float
@@ -34,6 +37,7 @@ class DQN:
     def __init__(
         self, 
         env, 
+        high_dim_input,
         epsilon,
         epsilon_min,
         epsilon_decay,
@@ -53,6 +57,7 @@ class DQN:
         self.batch_size = batch_size
         self.reset_target_ANN_updates = reset_target_ANN_updates
         self.Q = ANN
+        self.high_dim_input = high_dim_input
         
         self.replay_memory = [[], [], [], [], []]
         self.total_updates = 0
@@ -78,9 +83,10 @@ class DQN:
             sum_train_ep_len += train_ep_len
             avg_train_ep_len = sum_train_ep_len/(episode+1)
 
-            test_ep_len = self.play_one_episode()
-            sum_test_ep_len += test_ep_len
-            avg_test_ep_len = sum_test_ep_len/(episode+1)
+            if not init_replay_memory:
+                test_ep_len = self.play_one_episode()
+                sum_test_ep_len += test_ep_len
+                avg_test_ep_len = sum_test_ep_len/(episode+1)
             if not init_replay_memory:
                 print(
                     "Episode:", episode, 
@@ -93,7 +99,9 @@ class DQN:
 
             # Evaluate if solved
             # Currently very CartPole-v1 specific
-            if episode%100 == 0:
+            # TODO: check which criteria for initiating testing we should use
+            if episode%50 == 0 and not init_replay_memory:
+            #if test_ep_len >= 495:
                 solved_sum = 0
                 solved_no_ep = 100
                 for i in range(solved_no_ep):
@@ -118,6 +126,8 @@ class DQN:
         """
         ep_len = 0
         s = self.env.reset()
+        if self.high_dim_input:
+            s = self.format_state(self.env.render(mode="rgb_array"))
         done = False
         while not done:
             if init_replay_memory:
@@ -128,6 +138,10 @@ class DQN:
             self.replay_memory[0].append(s)
             self.replay_memory[1].append(a)
             self.replay_memory[2].append(r)
+
+            if self.high_dim_input:
+                s_ = self.format_state(self.env.render(mode="rgb_array"))
+
             self.replay_memory[3].append(s_)
             # Hack to set the right reward later
             if ep_len >= 500:
@@ -168,12 +182,16 @@ class DQN:
         """
         ep_len = 0
         s = self.env.reset()
+        if self.high_dim_input:
+            s = self.format_state(self.env.render(mode="rgb_array"))
         done = False
         while not done:
             if render:
                 self.env.render()
             a = self.get_greedy_action(s)
             s_, r, done, _ = self.env.step(a)
+            if self.high_dim_input:
+                s_ = self.format_state(self.env.render(mode="rgb_array"))
             s = s_
             ep_len += 1
         
@@ -219,7 +237,13 @@ class DQN:
         int
             The greedy action.
         """
-        s = torch.tensor(s).reshape((1, s.shape[0]))
+        if self.high_dim_input:
+            s = torch.tensor(s, dtype=torch.float)
+            s = torch.moveaxis(s, 2, 0)
+            s = torch.tensor(s, dtype=torch.float).reshape((1, s.shape[0], s.shape[1], s.shape[2]))
+        else:
+            s = torch.tensor(s).reshape((1, s.shape[0]))
+
         _, a = self.Q.predict_max(s)
 
         return a.item()
@@ -230,14 +254,18 @@ class DQN:
         """
         s, a, r, s_, done = self.sample_random_batch()
         s_ = torch.tensor(np.array(s_))
+        s = torch.tensor(np.array(s))
+        a = torch.tensor(np.array(a))
+
+        if self.high_dim_input:
+            s_ = self.format_high_dim_tensor(s_)
+            s = self.format_high_dim_tensor(s)
+
         target = self.calculate_target(
             r=r,
             s_=s_,
             done=done
         )
-
-        s = torch.tensor(np.array(s))
-        a = torch.tensor(np.array(a))
         target = torch.tensor(target, dtype=torch.float)
 
         # TODO: make sure so that a's actions is reindexed to start at zero (in case env don't start at 0)
@@ -287,3 +315,27 @@ class DQN:
         target = np.where(done, 0, target)
         
         return target
+
+    def format_high_dim_tensor(self, tensor):
+        tensor = tensor.to(torch.float)
+        tensor = torch.moveaxis(tensor, 3, 1)
+
+        return tensor
+
+    def format_state(self, s):
+        # Convert all non-whites to black
+        s[s<255] = 0
+        s = s/255
+        s = np.moveaxis(s, 2, 0)
+        s = torch.tensor(s)
+        
+        # Convert to grayscale and resize image
+        s = torchvision.transforms.functional.rgb_to_grayscale(s)
+        transform = torchvision.transforms.Resize(160)
+        s = transform(s)
+        # FIXME: waste to cast it back to np just to align with rest of code
+        s = torch.moveaxis(s, 0, 2).numpy()
+
+        return s
+
+

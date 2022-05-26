@@ -1,6 +1,6 @@
 import gym
 from DQN import DQN
-from ann_designer import ANN
+from ann_designer import SimpleMLP
 
 if __name__ == "__main__":
     env = gym.make("CartPole-v1")
@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     # TODO: automate testing
 
-    network = ANN(
+    network = SimpleMLP(
         in_features=in_features,
         out_features=out_features,
         lr=0.001
@@ -20,6 +20,7 @@ if __name__ == "__main__":
     # TODO: try double Q-learning
     agent = DQN(
         env=env,
+        high_dim_input=False,
         epsilon=1,
         epsilon_min=0.1,
         epsilon_decay=0.9999,
