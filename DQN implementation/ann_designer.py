@@ -78,7 +78,6 @@ class ANNBase(torch.nn.Module):
         """
         pred = self(x)
 
-        a = torch.tensor(a)
         aux = torch.ones(len(a), dtype=torch.int).cumsum(0)
         a += aux * self.out_features - self.out_features
         pred = pred.flatten()

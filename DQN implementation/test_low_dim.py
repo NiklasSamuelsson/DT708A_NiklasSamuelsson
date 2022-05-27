@@ -27,7 +27,7 @@ if __name__ == "__main__":
         discount=0.99,
         replay_memory_size=100000,
         batch_size=64,
-        reset_target_ANN_updates=1000,
+        reset_target_ANN_updates=200,
         ANN=network
     )
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     )
 
     train_eps, test_eps, eval_eps = agent.train(
-        no_episodes=100,
+        no_episodes=1200,
         init_replay_memory=False
     )
 
