@@ -1,4 +1,3 @@
-from xml.dom.xmlbuilder import _DOMInputSourceStringDataType
 import gym
 from DQN import DQN
 from ann_designer import SimpleMLP
@@ -22,13 +21,11 @@ no_init_eps = 500
 max_no_eps = 2000
 
 # Define experiment parameters
-# TODO: edit csv file afterwards (column names, also remove test columns in summary)
-# TODO also move each experiment to a different folder
-experiment_name = "experiment 1"
-no_trials = 1
-learing_rates = [0.01, 0.001, 0.0001]
-synch_invervals = [200, 1000, 2000]
-batch_sizes = [32, 64, 128]
+experiment_name = "experiment 2"
+no_trials = 10
+learing_rates = [0.0005, 0.001, 0.002]
+synch_invervals = [100, 200, 400]
+batch_sizes = [16, 32, 64]
 
 # Define logging
 path = "C:/Users/niksa/Projects/DT708A Reinforcement learning part 2/DT708A_NiklasSamuelsson/DQN implementation/Experiment results/"
@@ -143,9 +140,10 @@ for lr in learing_rates:
                     ]
                     eval_results.loc[len(eval_results)] = res
                 eval_path = details_path + "eval_" + str(lr) + "_" + str(si) + "_" + str(bs) + "_" + str(t) + ".csv"
+                eval_results.to_csv(eval_path, index=False, sep=";")
 
                 end = time.time()
-                print("Elapsed time trial", str(t) + ":", end-start)
+                print("Elapsed time trial", str(t+1) + ":", end-start)
                 curr_iteration += 1
             
             # Calculate aggregated statistics
