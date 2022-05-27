@@ -27,8 +27,8 @@ if __name__ == "__main__":
         epsilon_min=0.1,
         epsilon_decay=0.9999,
         discount=0.99,
-        replay_memory_size=100000,
-        batch_size=64,
+        replay_memory_size=35000,
+        batch_size=32,
         reset_target_ANN_updates=1000,
         ANN=network
     )

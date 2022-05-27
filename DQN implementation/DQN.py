@@ -76,18 +76,23 @@ class DQN:
         init_replay_memory : bool, optional
             Whether to train the agent (False) or just generate random experience (True), by default False
         """
+        train_eps = []
+        test_eps = []
+        eval_eps = []
         sum_train_ep_len = 0
         sum_test_ep_len = 0
         for episode in range(no_episodes):
             train_ep_len = self.train_one_episode(init_replay_memory)
             sum_train_ep_len += train_ep_len
             avg_train_ep_len = sum_train_ep_len/(episode+1)
+            train_eps.append(train_ep_len)
 
             if not init_replay_memory:
                 test_ep_len = self.play_one_episode()
                 sum_test_ep_len += test_ep_len
                 avg_test_ep_len = sum_test_ep_len/(episode+1)
-            if not init_replay_memory:
+                test_eps.append(test_ep_len)
+            if not init_replay_memory and False:
                 print(
                     "Episode:", episode, 
                     "\tTraining length:", train_ep_len, 
@@ -104,11 +109,17 @@ class DQN:
             #if test_ep_len >= 495:
                 solved_sum = 0
                 solved_no_ep = 100
+                temp_lst = []
                 for i in range(solved_no_ep):
-                    solved_sum += self.play_one_episode(verbose=False)
+                    temp = self.play_one_episode(verbose=False)
+                    temp_lst.append(temp)
+                    solved_sum += temp
+                eval_eps.append(temp_lst)
                 if solved_sum/solved_no_ep >= 495:
                     print("SOLVED")
-                    break
+                    return train_eps, test_eps, eval_eps
+
+        return train_eps, test_eps, eval_eps
 
     def train_one_episode(self, init_replay_memory):
         """

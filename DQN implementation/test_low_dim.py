@@ -31,18 +31,18 @@ if __name__ == "__main__":
         ANN=network
     )
 
-    agent.train(
-        no_episodes=500,
+    train_eps, test_eps, eval_eps = agent.train(
+        no_episodes=50,
         init_replay_memory=True
     )
 
-    agent.train(
-        no_episodes=1200,
+    train_eps, test_eps, eval_eps = agent.train(
+        no_episodes=100,
         init_replay_memory=False
     )
 
-    for i in range(10):
-        agent.play_one_episode(
-            render=True,
-            verbose=True
-        )
+    #for i in range(10):
+    #    agent.play_one_episode(
+    #        render=True,
+    #        verbose=True
+    #    )

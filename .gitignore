@@ -6,6 +6,7 @@
 
 # Data
 data/
+Experiment results/
 
 # Compilations
 __pycache__/
