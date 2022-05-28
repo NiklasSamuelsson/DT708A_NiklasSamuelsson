@@ -27,12 +27,12 @@ if __name__ == "__main__":
         discount=0.99,
         replay_memory_size=100000,
         batch_size=64,
-        reset_target_ANN_updates=200,
+        reset_target_ANN_updates=100,
         ANN=network
     )
 
     train_eps, test_eps, eval_eps = agent.train(
-        no_episodes=50,
+        no_episodes=500,
         init_replay_memory=True
     )
 
@@ -41,8 +41,8 @@ if __name__ == "__main__":
         init_replay_memory=False
     )
 
-    #for i in range(10):
-    #    agent.play_one_episode(
-    #        render=True,
-    #        verbose=True
-    #    )
+    for i in range(10):
+        agent.play_one_episode(
+            render=True,
+            verbose=True
+        )

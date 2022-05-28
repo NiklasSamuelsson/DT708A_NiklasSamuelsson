@@ -1,6 +1,6 @@
 import gym
 from DQN import DQN
-from ann_designer import SimpleMLP
+from ann_designer import SimpleMLP, CNN
 import pandas as pd
 import numpy as np
 import time
@@ -9,28 +9,29 @@ import time
 env = gym.make("CartPole-v1")
 
 # Define non-varying settings
-in_features = env.reset().shape[0]
+_ = env.reset()
+in_channels = 4
 out_features = env.action_space.n
-high_dim_input = False
+high_dim_input = True
 epsilon = 1
 epsilon_min = 0.1
-epsilon_decay = 0.9999
-discount = 0.99
-replay_memory_size = 100000
-no_init_eps = 500
+epsilon_decay = 0.9995
+discount = 0.95
+replay_memory_size = 20000
+no_init_eps = 10
 max_no_eps = 2000
 
 # Define experiment parameters
-experiment_name = "experiment 7"
-no_trials = 50
-learing_rates = [0.002]
-synch_invervals = [400]
-batch_sizes = [16]
+experiment_name = "experiment 5"
+no_trials = 1
+learing_rates = [0.001]
+synch_invervals = [4]
+batch_sizes = [32]
 
 # Define logging
 path = "C:/Users/niksa/Projects/DT708A Reinforcement learning part 2/DT708A_NiklasSamuelsson/DQN implementation/Experiment results/"
-summary_path = path + "/" + experiment_name + "/" + experiment_name + "_low dim_summary.csv"
-details_path = path + "/" + experiment_name + "/" + experiment_name + "_low dim_details_"  # More to be added later
+summary_path = path + "/" + experiment_name + "/" + experiment_name + "_high dim_summary.csv"
+details_path = path + "/" + experiment_name + "/" + experiment_name + "_high dim_details_"  # More to be added later
 summary = pd.DataFrame(
     columns=[
         "high_dim_input",
@@ -85,10 +86,10 @@ for lr in learing_rates:
                 print("Starting iteration", curr_iteration, "out of", tot_iterations)
                 start = time.time()
 
-                ANN = SimpleMLP(
-                    in_features=in_features,
+                ANN = CNN(
+                    in_channels=in_channels,
                     out_features=out_features,
-                    lr=lr
+                    lr=0.001
                 )
 
                 agent = DQN(

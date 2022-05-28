@@ -24,17 +24,17 @@ if __name__ == "__main__":
         env=env,
         high_dim_input=True,
         epsilon=1,
-        epsilon_min=0.1,
-        epsilon_decay=0.9999,
-        discount=0.99,
-        replay_memory_size=35000,
+        epsilon_min=0.01,
+        epsilon_decay=0.9995,
+        discount=0.95,
+        replay_memory_size=10000,
         batch_size=32,
-        reset_target_ANN_updates=1000,
+        reset_target_ANN_updates=4,
         ANN=network
     )
 
     agent.train(
-        no_episodes=50,
+        no_episodes=10,
         init_replay_memory=True
     )
 

@@ -81,6 +81,7 @@ class DQN:
         eval_eps = []
         sum_train_ep_len = 0
         sum_test_ep_len = 0
+        test_ep_len = 0
         for episode in range(no_episodes):
             train_ep_len = self.train_one_episode(init_replay_memory)
             sum_train_ep_len += train_ep_len
@@ -92,7 +93,7 @@ class DQN:
                 sum_test_ep_len += test_ep_len
                 avg_test_ep_len = sum_test_ep_len/(episode+1)
                 test_eps.append(test_ep_len)
-            if not init_replay_memory and False:
+            if not init_replay_memory:
                 print(
                     "Episode:", episode, 
                     "\tTraining length:", train_ep_len, 
@@ -105,8 +106,8 @@ class DQN:
             # Evaluate if solved
             # Currently very CartPole-v1 specific
             # TODO: check which criteria for initiating testing we should use
-            if episode%50 == 0 and not init_replay_memory:
-            #if test_ep_len >= 495:
+            #if episode%1 == 0 and not init_replay_memory:
+            if test_ep_len >= 495:
                 solved_sum = 0
                 solved_no_ep = 100
                 temp_lst = []
@@ -172,9 +173,13 @@ class DQN:
             if not init_replay_memory:
                 self.fit_ANN()
                 self.total_updates += 1
-                if self.total_updates%self.reset_target_ANN_updates == 0:
-                    self.Q_hat = copy.deepcopy(self.Q)
-
+                if self.high_dim_input:
+                    if ep_len%self.reset_target_ANN_updates == 0:
+                        self.Q_hat = copy.deepcopy(self.Q)
+                else:
+                    if self.total_updates%self.reset_target_ANN_updates == 0:
+                        self.Q_hat = copy.deepcopy(self.Q)
+                
             s = s_
             ep_len += 1
         
