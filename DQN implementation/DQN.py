@@ -106,8 +106,8 @@ class DQN:
             # Evaluate if solved
             # Currently very CartPole-v1 specific
             # TODO: check which criteria for initiating testing we should use
-            #if episode%1 == 0 and not init_replay_memory:
-            if test_ep_len >= 495:
+            if episode%50 == 0 and not init_replay_memory:
+            #if test_ep_len >= 495:
                 solved_sum = 0
                 solved_no_ep = 100
                 temp_lst = []
@@ -115,7 +115,7 @@ class DQN:
                     temp = self.play_one_episode(verbose=False)
                     temp_lst.append(temp)
                     solved_sum += temp
-                eval_eps.append(temp_lst)
+                eval_eps.append((self.total_updates, temp_lst))
                 if solved_sum/solved_no_ep >= 495:
                     print("SOLVED")
                     return train_eps, test_eps, eval_eps

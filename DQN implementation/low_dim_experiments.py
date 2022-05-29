@@ -21,11 +21,11 @@ no_init_eps = 500
 max_no_eps = 2000
 
 # Define experiment parameters
-experiment_name = "experiment 7"
-no_trials = 50
-learing_rates = [0.002]
-synch_invervals = [400]
-batch_sizes = [16]
+experiment_name = "experiment 8"
+no_trials = 2
+learing_rates = [0.001]
+synch_invervals = [100]
+batch_sizes = [64]
 
 # Define logging
 path = "C:/Users/niksa/Projects/DT708A Reinforcement learning part 2/DT708A_NiklasSamuelsson/DQN implementation/Experiment results/"
@@ -125,26 +125,32 @@ for lr in learing_rates:
                         "eval_avg",
                         "eval_var",
                         "eval_min",
-                        "eval_max"
+                        "eval_max",
+                        "no_updates"
                     ]
                 )
                 
                 # For special case of NOT evaluating every 50th episode
-                eval_episode_lst = [x for x in range(len(test)) if test[x] >= 495]
+                #eval_episode_lst = [x for x in range(len(test)) if test[x] >= 495]
                 for idx, eval_trial in enumerate(eval):
-                    eval_avg = np.mean(eval_trial)
-                    eval_var = np.var(eval_trial)
-                    eval_min = np.min(eval_trial)
-                    eval_max = np.max(eval_trial)
+                    eval_avg = np.mean(eval_trial[1])
+                    eval_var = np.var(eval_trial[1])
+                    eval_min = np.min(eval_trial[1])
+                    eval_max = np.max(eval_trial[1])
 
-                    eval_episode = eval_episode_lst[idx]
+                    eval_no_updates = eval_trial[0]
+
+                    #eval_episode = eval_episode_lst[idx]
+                    idx *= 50
 
                     res = [
-                        eval_episode,
+                        #eval_episode,
+                        idx,
                         eval_avg,
                         eval_var,
                         eval_min,
-                        eval_max
+                        eval_max,
+                        eval_no_updates
                     ]
                     eval_results.loc[len(eval_results)] = res
                 eval_path = details_path + "eval_" + str(lr) + "_" + str(si) + "_" + str(bs) + "_" + str(t) + ".csv"
