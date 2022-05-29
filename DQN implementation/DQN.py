@@ -1,4 +1,5 @@
 import random
+from re import S
 import numpy as np
 import copy
 import torch
@@ -63,6 +64,10 @@ class DQN:
         self.total_updates = 0
         self.Q_hat = copy.deepcopy(self.Q)
         self.all_actions = [a for a in range(self.env.action_space.start, self.env.action_space.n)]
+
+        if self.high_dim_input:
+            self.blur1 = np.array([[(0.5 if i == j // 2 else 0.0) for j in range(200)] for i in range(100)])
+            self.blur2 = np.array([[(0.5 if j == i // 2 else 0.0) for j in range(300)] for i in range(600)])
 
     def train(self, no_episodes, init_replay_memory=False):
         """
@@ -139,7 +144,7 @@ class DQN:
         ep_len = 0
         s = self.env.reset()
         if self.high_dim_input:
-            s = np.zeros((4, 160, 240))
+            s = np.zeros((4, 100, 300))
             img = self.format_state(self.env.render(mode="rgb_array"))
             for i in range(4):
                 s[i] = img
@@ -349,18 +354,12 @@ class DQN:
         return tensor
 
     def format_state(self, s):
-        # Convert all non-whites to black
-        s[s<255] = 0
-        s = s/255
-        s = np.moveaxis(s, 2, 0)
-        s = torch.tensor(s)
-        
-        # Convert to grayscale and resize image
-        s = torchvision.transforms.functional.rgb_to_grayscale(s)
-        transform = torchvision.transforms.Resize(160)
-        s = transform(s)
-        # FIXME: waste to cast it back to np just to align with rest of code
-        s = s.squeeze().numpy()
+        # Convert all non-whites to black        
+        s = np.matmul(s, np.array([0.2126, 0.7152, 0.0722]))
+        s = s[150:350, 0:600]
+        s = np.matmul(self.blur1, s)
+        s = np.matmul(s, self.blur2)
+        s = s / 255 - 0.5
 
         return s
 

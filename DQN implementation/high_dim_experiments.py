@@ -132,7 +132,7 @@ for lr in learing_rates:
                 )
                 
                 # For special case of NOT evaluating every 50th episode
-                eval_episode_lst = [x for x in range(len(test)) if test[x] >= 495]
+                #eval_episode_lst = [x for x in range(len(test)) if test[x] >= 495]
                 for idx, eval_trial in enumerate(eval):
                     eval_avg = np.mean(eval_trial[1])
                     eval_var = np.var(eval_trial[1])
@@ -141,12 +141,12 @@ for lr in learing_rates:
 
                     eval_no_updates = eval_trial[0]
 
-                    eval_episode = eval_episode_lst[idx]
-                    #idx *= 50
+                    #eval_episode = eval_episode_lst[idx]
+                    idx *= 50
 
                     res = [
-                        eval_episode,
-                        #idx,
+                        #eval_episode,
+                        idx,
                         eval_avg,
                         eval_var,
                         eval_min,

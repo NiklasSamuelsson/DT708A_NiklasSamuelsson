@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 
 class ANNBase(torch.nn.Module):
@@ -246,6 +247,7 @@ if __name__ == "__main__":
     env.reset()
     s = env.render(mode="rgb_array")
 
+    """
     # Retain colors
     s = env.render(mode="rgb_array")
     s = np.moveaxis(s, 2, 0)
@@ -274,5 +276,18 @@ if __name__ == "__main__":
     transform = torchvision.transforms.Resize(100)
     resized_img = transform(gray)
     plt.imshow(torch.squeeze(resized_img), cmap="gray")
+    """
+
+    # Samuel's approach
+    blur1 = np.array([[(0.5 if i == j // 2 else 0.0) for j in range(200)] for i in range(100)])
+    blur2 = np.array([[(0.5 if j == i // 2 else 0.0) for j in range(300)] for i in range(600)])
+    pix = env.render(mode='rgb_array')
+    pix = np.matmul(pix, np.array([0.2126, 0.7152, 0.0722]))
+    pix = pix[150:350, 0:600]
+    pix = np.matmul(blur1, pix)
+    pix = np.matmul(pix, blur2)
+    pix = pix / 255 - 0.5
+    pix.resize((1, len(pix), len(pix[0])))
+
 
 
