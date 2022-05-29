@@ -152,7 +152,7 @@ class DQN:
             s_, r, done, _ = self.env.step(a)
             self.replay_memory[0].append(s)
             self.replay_memory[1].append(a)
-            self.replay_memory[2].append(r)
+            self.replay_memory[2].append(0)
 
             if self.high_dim_input:
                 next_img = self.format_state(self.env.render(mode="rgb_array"))
@@ -338,7 +338,7 @@ class DQN:
         target = np.add(r, np.multiply(self.discount, v.detach().numpy()))
 
         # Don't reward agent when ending episode
-        target = np.where(done, 0, target)
+        target = np.where(done, -1, target)
         
         return target
 

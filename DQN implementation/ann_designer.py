@@ -202,14 +202,15 @@ class CNN(ANNBase):
         # Architecture inspired by: https://github.com/LM095/CartPole-CNN
         self.seq = torch.nn.Sequential()
 
-        self.seq.append(torch.nn.Conv2d(in_channels=self.in_channels, out_channels=64, kernel_size=5, stride=3))
-        self.seq.append(torch.nn.ReLU())
+        self.seq.append(torch.nn.Conv2d(in_channels=self.in_channels, out_channels=32, kernel_size=5, stride=3, padding=2))
+        self.seq.append(torch.nn.LeakyReLU())
+        # TODO: leaky ReLU instead
 
-        self.seq.append(torch.nn.Conv2d(in_channels=64, out_channels=64, kernel_size=4, stride=2))
-        self.seq.append(torch.nn.ReLU())
+        self.seq.append(torch.nn.Conv2d(in_channels=32, out_channels=32, kernel_size=4, stride=3, padding=2))
+        self.seq.append(torch.nn.LeakyReLU())
 
-        self.seq.append(torch.nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1))
-        self.seq.append(torch.nn.ReLU())
+        self.seq.append(torch.nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=2, padding=2))
+        self.seq.append(torch.nn.LeakyReLU())
 
         self.seq.append(torch.nn.Flatten())
 
@@ -217,16 +218,16 @@ class CNN(ANNBase):
         x = torch.randn(1, self.in_channels, 160, 240)
         in_features_fc = self.seq(x).shape[1]
 
-        self.seq.append(torch.nn.Linear(in_features=in_features_fc, out_features=512))
-        self.seq.append(torch.nn.ReLU())
+        self.seq.append(torch.nn.Linear(in_features=in_features_fc, out_features=256))
+        self.seq.append(torch.nn.LeakyReLU())
 
-        self.seq.append(torch.nn.Linear(in_features=512, out_features=256))
-        self.seq.append(torch.nn.ReLU())
+        self.seq.append(torch.nn.Linear(in_features=256, out_features=128))
+        self.seq.append(torch.nn.LeakyReLU())
 
-        self.seq.append(torch.nn.Linear(in_features=256, out_features=64))
-        self.seq.append(torch.nn.ReLU())
+        self.seq.append(torch.nn.Linear(in_features=128, out_features=32))
+        self.seq.append(torch.nn.LeakyReLU())
 
-        self.seq.append(torch.nn.Linear(in_features=64, out_features=self.out_features))
+        self.seq.append(torch.nn.Linear(in_features=32, out_features=self.out_features))
 
         self.loss_fn = torch.nn.MSELoss()
         self.optimizer = torch.optim.Adam(
