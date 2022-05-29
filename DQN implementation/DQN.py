@@ -178,12 +178,8 @@ class DQN:
             if not init_replay_memory:
                 self.fit_ANN()
                 self.total_updates += 1
-                if self.high_dim_input:
-                    if ep_len%self.reset_target_ANN_updates == 0:
-                        self.Q_hat = copy.deepcopy(self.Q)
-                else:
-                    if self.total_updates%self.reset_target_ANN_updates == 0:
-                        self.Q_hat = copy.deepcopy(self.Q)
+                if self.total_updates%self.reset_target_ANN_updates == 0:
+                    self.Q_hat = copy.deepcopy(self.Q)
                 
             s = s_
             ep_len += 1
@@ -209,7 +205,7 @@ class DQN:
         ep_len = 0
         s = self.env.reset()
         if self.high_dim_input:
-            s = np.zeros((4, 160, 240))
+            s = np.zeros((4, 100, 300))
             img = self.format_state(self.env.render(mode="rgb_array"))
             for i in range(4):
                 s[i] = img

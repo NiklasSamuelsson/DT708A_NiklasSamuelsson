@@ -216,7 +216,7 @@ class CNN(ANNBase):
         self.seq.append(torch.nn.Flatten())
 
         # Lazy way of finding the right shape
-        x = torch.randn(1, self.in_channels, 160, 240)
+        x = torch.randn(1, self.in_channels, 100, 300)
         in_features_fc = self.seq(x).shape[1]
 
         self.seq.append(torch.nn.Linear(in_features=in_features_fc, out_features=256))
