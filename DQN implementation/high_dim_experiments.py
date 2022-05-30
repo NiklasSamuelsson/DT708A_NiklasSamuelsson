@@ -17,16 +17,16 @@ epsilon = 1
 epsilon_min = 0.1
 epsilon_decay = 0.9995
 discount = 0.95
-replay_memory_size = 20000
-no_init_eps = 10
-max_no_eps = 2000
+replay_memory_size = 25000
+no_init_eps = 500
+max_no_eps = 5000
 
 # Define experiment parameters
-experiment_name = "experiment 5"
+experiment_name = "experiment 18"
 no_trials = 1
-learing_rates = [0.001]
-synch_invervals = [4]
-batch_sizes = [32]
+learing_rates = [0.00025]
+synch_invervals = [200]
+batch_sizes = [64]
 
 # Define logging
 path = "C:/Users/niksa/Projects/DT708A Reinforcement learning part 2/DT708A_NiklasSamuelsson/DQN implementation/Experiment results/"

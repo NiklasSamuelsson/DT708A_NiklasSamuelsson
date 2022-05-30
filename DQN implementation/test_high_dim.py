@@ -10,8 +10,6 @@ if __name__ == "__main__":
     in_channels = 4
     out_features = env.action_space.n
 
-    # TODO: automate testing
-
     network = CNN(
         in_channels=in_channels,
         out_features=out_features,
@@ -24,17 +22,17 @@ if __name__ == "__main__":
         env=env,
         high_dim_input=True,
         epsilon=1,
-        epsilon_min=0.01,
-        epsilon_decay=0.9995,
-        discount=0.95,
-        replay_memory_size=10000,
-        batch_size=32,
-        reset_target_ANN_updates=4,
+        epsilon_min=0.1,
+        epsilon_decay=0.999,
+        discount=0.99,
+        replay_memory_size=20000,
+        batch_size=129,
+        reset_target_ANN_updates=10,
         ANN=network
     )
 
     agent.train(
-        no_episodes=10,
+        no_episodes=50,
         init_replay_memory=True
     )
 

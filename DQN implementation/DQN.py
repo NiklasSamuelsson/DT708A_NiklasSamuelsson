@@ -1,15 +1,13 @@
 import random
-from re import S
 import numpy as np
 import copy
 import torch
-import torchvision
 
 
 class DQN:
     """
     An implementation of Deep-Q-learning using artificial artificial neural networks 
-    as state-action value function approximators.
+    as state-action value function approximators. Implemented for CartPole-v1.
 
     Parameters
     ----------
@@ -87,6 +85,7 @@ class DQN:
         sum_train_ep_len = 0
         sum_test_ep_len = 0
         test_ep_len = 0
+
         for episode in range(no_episodes):
             train_ep_len = self.train_one_episode(init_replay_memory)
             sum_train_ep_len += train_ep_len
@@ -109,10 +108,9 @@ class DQN:
                     "\tExp buffer size:", len(self.replay_memory[0]))
 
             # Evaluate if solved
-            # Currently very CartPole-v1 specific
-            # TODO: check which criteria for initiating testing we should use
             if episode%50 == 0 and not init_replay_memory:
             #if test_ep_len >= 495:
+
                 solved_sum = 0
                 solved_no_ep = 100
                 temp_lst = []
@@ -154,7 +152,11 @@ class DQN:
                 a = self.env.action_space.sample()
             else:
                 a = self.get_action(s)
-            s_, r, done, _ = self.env.step(a)
+
+            if self.high_dim_input:
+                not_used, r, done, _ = self.env.step(a)
+            else:
+                s_, r, done, _ = self.env.step(a)
             self.replay_memory[0].append(s)
             self.replay_memory[1].append(a)
             self.replay_memory[2].append(0)
@@ -214,7 +216,10 @@ class DQN:
             if render:
                 self.env.render()
             a = self.get_greedy_action(s)
-            s_, r, done, _ = self.env.step(a)
+            if self.high_dim_input:
+                not_used, r, done, _ = self.env.step(a)
+            else:
+                s_, r, done, _ = self.env.step(a)
             if self.high_dim_input:
                 next_img = self.format_state(self.env.render(mode="rgb_array"))
                 s_ = np.roll(s, 1, axis=0)
@@ -266,7 +271,6 @@ class DQN:
         """
         if self.high_dim_input:
             s = torch.tensor(s, dtype=torch.float)
-            #s = torch.moveaxis(s, 2, 0)
             s = s.reshape(1, *s.shape)
         else:
             s = torch.tensor(s).reshape((1, s.shape[0]))
@@ -295,8 +299,6 @@ class DQN:
         )
         target = torch.tensor(target, dtype=torch.float)
 
-        # TODO: make sure so that a's actions is reindexed to start at zero (in case env don't start at 0)
-        #   Currently works for CartPole-v1, but is maybe not general
         self.Q.train_one_epoch(s, a, target)
 
     def sample_random_batch(self):
@@ -344,13 +346,41 @@ class DQN:
         return target
 
     def format_high_dim_tensor(self, tensor):
+        """
+        Applied the neccessary formatting for high dimensionality tensors.
+
+        Parameters
+        ----------
+        tensor : PyTorch tensor
+            The tensor to be formatted.
+
+        Returns
+        -------
+        PyTorch tensor
+            The same tensor but formatted properly.
+        """
         tensor = tensor.to(torch.float)
-        #tensor = torch.moveaxis(tensor, 3, 1)
 
         return tensor
 
     def format_state(self, s):
-        # Convert all non-whites to black        
+        """
+        Converts the state image into a smaller size.
+        1) Makes the image to gray scale (1D) instead of color (3D)
+        2) Crops the image to remove unneccessary white space 
+        3) Reduces the size to 100x300
+        4) Scales the gray scale values down 
+
+        Parameters
+        ----------
+        s : numpy array
+            A 3D numpy array describing the state as an RGB image.
+
+        Returns
+        -------
+        numpy array
+            The formatted version of the state.
+        """     
         s = np.matmul(s, np.array([0.2126, 0.7152, 0.0722]))
         s = s[150:350, 0:600]
         s = np.matmul(self.blur1, s)

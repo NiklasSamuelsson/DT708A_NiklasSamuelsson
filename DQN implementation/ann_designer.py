@@ -155,6 +155,16 @@ class SimpleMLP(ANNBase):
 
 
 class ImageMLP(ANNBase):
+    """
+    Simply MLP to be used with images as input. To be used as the Q function approximator for DQN.
+
+    Parameters
+    ----------
+    out_features : int
+        The number of output featurs to the network.
+    lr : float, optional
+        The learning rate, by default 0.0001
+    """
 
     def __init__(self, out_features, lr):
         self.out_features = out_features
@@ -163,6 +173,9 @@ class ImageMLP(ANNBase):
         super().__init__()
 
     def build_network(self):
+        """
+        Contructs the network.
+        """
         self.seq = torch.nn.Sequential()
 
         self.seq.append(torch.nn.Flatten())
@@ -190,6 +203,18 @@ class ImageMLP(ANNBase):
 
 
 class CNN(ANNBase):
+    """
+    Convolutional Neural Network to be used for the Q function for DQN.
+
+    Parameters
+    ----------
+    in_channels : _type_
+        _description_
+    out_features : _type_
+        _description_
+    lr : _type_
+        _description_
+    """
 
     def __init__(self, in_channels, out_features, lr):
         self.in_channels = in_channels
@@ -199,7 +224,9 @@ class CNN(ANNBase):
         super().__init__()
 
     def build_network(self):
-
+        """
+        Contructs the network.
+        """
         # Architecture inspired by: https://github.com/LM095/CartPole-CNN
         self.seq = torch.nn.Sequential()
 

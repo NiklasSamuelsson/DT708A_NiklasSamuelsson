@@ -8,8 +8,6 @@ if __name__ == "__main__":
     in_features = env.reset().shape[0]
     out_features = env.action_space.n
 
-    # TODO: automate testing
-
     network = SimpleMLP(
         in_features=in_features,
         out_features=out_features,
@@ -26,7 +24,7 @@ if __name__ == "__main__":
         epsilon_decay=0.9999,
         discount=0.99,
         replay_memory_size=100000,
-        batch_size=64,
+        batch_size=128,
         reset_target_ANN_updates=100,
         ANN=network
     )
@@ -41,8 +39,8 @@ if __name__ == "__main__":
         init_replay_memory=False
     )
 
-    for i in range(10):
-        agent.play_one_episode(
-            render=True,
-            verbose=True
-        )
+    #for i in range(10):
+    #    agent.play_one_episode(
+    #        render=True,
+    #        verbose=True
+    #    )

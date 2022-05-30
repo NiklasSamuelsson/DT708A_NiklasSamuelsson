@@ -21,9 +21,9 @@ no_init_eps = 500
 max_no_eps = 2000
 
 # Define experiment parameters
-experiment_name = "experiment 8"
-no_trials = 2
-learing_rates = [0.001]
+experiment_name = "experiment 15"
+no_trials = 10
+learing_rates = [0.005]
 synch_invervals = [100]
 batch_sizes = [64]
 
