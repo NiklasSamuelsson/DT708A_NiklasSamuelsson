@@ -21,11 +21,11 @@ no_init_eps = 500
 max_no_eps = 2000
 
 # Define experiment parameters
-experiment_name = "experiment 15"
+experiment_name = "experiment 19"
 no_trials = 10
-learing_rates = [0.005]
+learing_rates = [0.002]
 synch_invervals = [100]
-batch_sizes = [64]
+batch_sizes = [16]
 
 # Define logging
 path = "C:/Users/niksa/Projects/DT708A Reinforcement learning part 2/DT708A_NiklasSamuelsson/DQN implementation/Experiment results/"
